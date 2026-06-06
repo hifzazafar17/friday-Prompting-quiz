@@ -10,9 +10,9 @@ const TIER_CONFIG = {
     heading: 'Perfect',
     range: '10/10 →',
     message: 'git commit -m "Perfect score. No bugs found."',
-    color: 'text-yellow-300',
-    bg: 'bg-yellow-900',
-    border: 'border-yellow-700',
+    color: 'text-amber-400',
+    bg: 'bg-amber-900',
+    border: 'border-amber-600',
   },
   good: {
     heading: 'Good Work',
@@ -73,7 +73,6 @@ export default function LeaderboardPage() {
   }
   results.forEach(r => grouped[getScoreTier(r.score)].push(r))
 
-  // Global rank map — results already sorted score DESC, time ASC from API
   const globalRankMap = new Map(results.map((r, i) => [r.id, i + 1]))
 
   return (
@@ -99,9 +98,7 @@ export default function LeaderboardPage() {
         </div>
 
         {loading && (
-          <div className="text-center py-16 text-slate-400 font-mono text-sm">
-            Loading results...
-          </div>
+          <div className="text-center py-16 text-slate-400 font-mono text-sm">Loading results...</div>
         )}
 
         {!loading && error && (
@@ -117,11 +114,13 @@ export default function LeaderboardPage() {
         {!loading && !error && (
           <>
             {results.length === 0 ? (
-              <div className="text-center py-16 bg-slate-800 border border-slate-700 rounded-xl">
+              <div className="text-center py-16 rounded-xl" style={{
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.07)',
+              }}>
                 <p className="text-slate-400 font-mono text-sm">No results yet. Be the first to play.</p>
               </div>
             ) : (
-              /* 4 columns on desktop, stacked on mobile */
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-3 md:items-start">
                 {TIER_ORDER.map(tier => {
                   const cfg   = TIER_CONFIG[tier]
@@ -131,23 +130,40 @@ export default function LeaderboardPage() {
                     <div key={tier}>
                       {/* Column header */}
                       <div className={`${cfg.bg} border ${cfg.border} rounded-t-xl px-4 py-4`}>
-                        <h2 className={`text-xl font-bold ${cfg.color}`}>{cfg.heading}</h2>
-                        <p className="text-slate-500 font-mono text-xs mt-0.5">{cfg.range}</p>
-                        <p className="text-slate-300 font-mono text-xs mt-2 leading-relaxed break-words">
+
+                        {/* Heading + star for perfect */}
+                        <div className="flex items-center gap-2 mb-1">
+                          <h2 className={`text-xl font-bold ${cfg.color}`}>{cfg.heading}</h2>
+                          {tier === 'perfect' && (
+                            <span className="star-blink" style={{ fontSize: '16px' }}>⭐</span>
+                          )}
+                        </div>
+
+                        {/* Range — white bold */}
+                        <p className="text-white font-bold font-mono text-sm mt-0.5">
+                          {cfg.range}
+                        </p>
+
+                        {/* Developer message — readable */}
+                        <p className="text-slate-200 font-mono text-xs mt-2 leading-relaxed break-words">
                           {cfg.message}
                         </p>
-                        <div className="mt-3 pt-2.5 border-t border-slate-700/40">
-                          <span className="text-slate-500 text-xs">
+
+                        <div className="mt-3 pt-2.5 border-t border-black/20">
+                          <span className="text-slate-300 text-xs">
                             {group.length} {group.length === 1 ? 'student' : 'students'}
                           </span>
                         </div>
                       </div>
 
                       {/* Student list */}
-                      <div className="bg-slate-800 border border-t-0 border-slate-700 rounded-b-xl overflow-hidden">
+                      <div className="border border-t-0 rounded-b-xl overflow-hidden" style={{
+                        background: 'rgba(255,255,255,0.04)',
+                        borderColor: 'rgba(255,255,255,0.08)',
+                      }}>
                         {group.length === 0 ? (
                           <div className="px-4 py-8 text-center">
-                            <p className="text-slate-700 text-xs font-mono">No students here</p>
+                            <p className="text-slate-600 text-xs font-mono">No students here</p>
                           </div>
                         ) : (
                           group.map((r, i) => {
@@ -157,7 +173,8 @@ export default function LeaderboardPage() {
 
                             return (
                               <div key={r.id}
-                                className="px-4 py-3 border-b border-slate-700/50 last:border-0 hover:bg-slate-700/20 transition-colors">
+                                className="px-4 py-3 border-b last:border-0 transition-colors"
+                                style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
                                 <div className="flex items-center justify-between mb-1">
                                   <span className={`font-mono ${medal ? 'text-sm' : 'text-xs text-slate-500'}`}>
                                     {medal || `#${tierRank}`}
@@ -185,13 +202,12 @@ export default function LeaderboardPage() {
           </>
         )}
 
-        {/* Footer */}
         <div className="mt-8 text-center">
           <Link href="/"
             className="inline-block bg-teal-600 hover:bg-teal-500 text-white font-semibold px-6 py-3 rounded-lg transition-colors text-sm">
             Take the Quiz →
           </Link>
-          <p className="text-slate-600 text-xs font-mono mt-4">
+          <p className="text-slate-700 text-xs font-mono mt-4">
             GIAIC · Agentic AI · Karachi · refreshes every 30s
           </p>
         </div>

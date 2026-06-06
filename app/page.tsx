@@ -6,7 +6,16 @@ import type { Question, Screen, QuizResult } from '@/lib/types'
 import { getScoreMessage, getScoreTier, formatTime } from '@/lib/types'
 import { getRandomQuestions, shuffleOptions } from '@/lib/questions'
 
-const TOTAL_SECONDS = 450 // 7.5 minutes
+const TOTAL_SECONDS = 450
+
+// Glass card style — applied to all screen cards
+const glass: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.05)',
+  backdropFilter: 'blur(20px)',
+  WebkitBackdropFilter: 'blur(20px)',
+  border: '1px solid rgba(255,255,255,0.09)',
+  borderRadius: '16px',
+}
 
 const BLOCKED_MSGS = [
   { title: 'Error 403: Forbidden',
@@ -46,10 +55,18 @@ function Spinner() {
 
 function tierColor(score: number) {
   const t = getScoreTier(score)
-  if (t === 'perfect') return 'text-yellow-300'
+  if (t === 'perfect') return 'text-amber-400'
   if (t === 'good')    return 'text-green-400'
   if (t === 'mid')     return 'text-orange-400'
   return 'text-red-400'
+}
+
+function tierBorderColor(score: number) {
+  const t = getScoreTier(score)
+  if (t === 'perfect') return '#d97706'
+  if (t === 'good')    return '#16a34a'
+  if (t === 'mid')     return '#ea580c'
+  return '#dc2626'
 }
 
 // ── Landing ───────────────────────────────────────────────────────────────────
@@ -75,47 +92,54 @@ function LandingScreen({ onStart }: { onStart: (name: string, roll: string) => P
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <p className="text-teal-400 font-mono text-xs mb-2 tracking-widest uppercase">GIAIC · Agentic AI · Class 2</p>
-          <h1 className="text-3xl font-bold text-white mb-2">AI Prompting 2026</h1>
+          <p className="text-teal-400 font-mono text-xs mb-2 tracking-widest uppercase">
+            GIAIC · Agentic AI · Class 2
+          </p>
+          <h1 className="text-4xl font-bold text-white mb-2">AI Prompting 2026</h1>
           <p className="text-slate-400 text-sm">10 questions · 7.5 minutes · one attempt</p>
         </div>
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl">
-          <p className="font-mono text-teal-400 text-xs mb-5">$ ./start-quiz</p>
+
+        {/* Glass card */}
+        <div style={{ ...glass, padding: '28px' }}>
+          <p className="font-mono text-teal-400 text-xs mb-6">$ ./start-quiz</p>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-slate-300 text-sm mb-1.5 font-medium">Full Name</label>
-              <input type="text" value={name} onChange={e => setName(e.target.value)}
+              <input
+                type="text" value={name} onChange={e => setName(e.target.value)}
                 placeholder="e.g. Ahmed Khan" disabled={loading}
-                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white
-                           placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors
-                           disabled:opacity-50 text-sm"/>
+                className="glass-input px-4 py-3 text-sm font-sans"
+              />
             </div>
             <div>
               <label className="block text-slate-300 text-sm mb-1.5 font-medium">Roll Number</label>
-              <input type="text" value={roll}
+              <input
+                type="text" value={roll}
                 onChange={e => setRoll(e.target.value.replace(/\D/g, '').slice(0, 8))}
                 placeholder="8-digit number (e.g. 00492394)" disabled={loading} maxLength={8}
-                className="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-white
-                           placeholder-slate-500 focus:outline-none focus:border-teal-500 transition-colors
-                           disabled:opacity-50 font-mono text-sm tracking-widest"/>
-              <p className="text-slate-500 text-xs mt-1">From your GIAIC ID card</p>
+                className="glass-input px-4 py-3 text-sm font-mono tracking-widest"
+              />
+              <p className="text-slate-600 text-xs mt-1">From your GIAIC ID card</p>
             </div>
             {error && (
-              <div className="bg-red-950 border border-red-700 rounded-lg px-4 py-3">
+              <div className="rounded-lg px-4 py-3" style={{ background:'rgba(220,38,38,0.15)', border:'1px solid rgba(220,38,38,0.3)' }}>
                 <p className="text-red-400 text-sm font-mono">{error}</p>
               </div>
             )}
             <button type="submit" disabled={loading}
-              className="w-full bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 text-white
+              className="w-full bg-teal-600 hover:bg-teal-500 disabled:opacity-40 text-white
                          font-semibold py-3 rounded-lg transition-colors disabled:cursor-not-allowed mt-2">
               {loading ? <Spinner/> : 'Start Quiz →'}
             </button>
           </form>
-          <div className="mt-4 pt-4 border-t border-slate-700">
-            <p className="text-slate-500 text-xs text-center">One attempt per student · Roll number is your unique identifier</p>
+          <div className="mt-5 pt-4" style={{ borderTop:'1px solid rgba(255,255,255,0.06)' }}>
+            <p className="text-slate-600 text-xs text-center">
+              One attempt per student · Roll number is your unique identifier
+            </p>
           </div>
         </div>
-        <div className="text-center mt-4">
+
+        <div className="text-center mt-5">
           <Link href="/leaderboard" className="text-teal-400 hover:text-teal-300 text-sm transition-colors">
             View leaderboard →
           </Link>
@@ -132,7 +156,7 @@ function BlockedScreen({ entry, onLeaderboard }: { entry: QuizResult; onLeaderbo
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className="bg-slate-800 border border-red-700 rounded-xl p-6 shadow-xl">
+        <div style={{ ...glass, border: '1px solid rgba(220,38,38,0.4)', padding: '24px' }}>
           <div className="flex items-center gap-2 mb-4">
             <div className="w-3 h-3 rounded-full bg-red-500"/>
             <div className="w-3 h-3 rounded-full bg-yellow-500"/>
@@ -141,14 +165,16 @@ function BlockedScreen({ entry, onLeaderboard }: { entry: QuizResult; onLeaderbo
           </div>
           <p className="text-red-400 font-mono text-xs mb-3">✗ {msg.title}</p>
           <p className="text-slate-300 text-sm mb-5 leading-relaxed">{body}</p>
-          <div className="bg-slate-900 rounded-lg p-4 mb-5 font-mono text-sm space-y-1">
+          <div className="rounded-lg p-4 mb-5 font-mono text-sm space-y-1"
+            style={{ background:'rgba(0,0,0,0.4)', border:'1px solid rgba(255,255,255,0.06)' }}>
             <div className="flex justify-between"><span className="text-slate-500">student</span><span className="text-white">{entry.student_name}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">roll_no</span><span className="text-teal-400">{entry.roll_number}</span></div>
             <div className="flex justify-between"><span className="text-slate-500">score</span><span className={tierColor(entry.score)}>{entry.score}/10</span></div>
             <div className="flex justify-between"><span className="text-slate-500">status</span><span className="text-yellow-400">LOCKED</span></div>
           </div>
           <button onClick={onLeaderboard}
-            className="w-full bg-slate-700 hover:bg-slate-600 text-white font-semibold py-3 rounded-lg transition-colors text-sm">
+            className="w-full text-white font-semibold py-3 rounded-lg transition-colors text-sm"
+            style={{ background:'rgba(255,255,255,0.08)', border:'1px solid rgba(255,255,255,0.12)' }}>
             View Leaderboard
           </button>
         </div>
@@ -168,15 +194,12 @@ function QuizScreen({ questions, onComplete }: {
   const [score, setScore]       = useState(0)
   const [timeLeft, setTimeLeft] = useState(TOTAL_SECONDS)
 
-  // Refs to avoid stale closures inside setInterval
   const scoreRef    = useRef(0)
   const timeLeftRef = useRef(TOTAL_SECONDS)
   const doneRef     = useRef(false)
 
-  // Keep scoreRef in sync with state
   useEffect(() => { scoreRef.current = score }, [score])
 
-  // Countdown timer
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeLeft(prev => {
@@ -185,7 +208,6 @@ function QuizScreen({ questions, onComplete }: {
         if (next <= 0 && !doneRef.current) {
           doneRef.current = true
           clearInterval(interval)
-          // Time's up — submit whatever score they have
           onComplete(scoreRef.current, TOTAL_SECONDS)
           return 0
         }
@@ -199,10 +221,8 @@ function QuizScreen({ questions, onComplete }: {
   const isLast  = currentQ === questions.length - 1
   const letters = ['A', 'B', 'C', 'D']
 
-  // Timer appearance
   const timerColor = timeLeft <= 60 ? 'text-red-400'
-    : timeLeft <= 120 ? 'text-yellow-400'
-    : 'text-teal-400'
+    : timeLeft <= 120 ? 'text-yellow-400' : 'text-teal-400'
 
   function handleSelect(idx: number) {
     if (revealed || doneRef.current) return
@@ -215,53 +235,54 @@ function QuizScreen({ questions, onComplete }: {
     if (doneRef.current) return
     if (isLast) {
       doneRef.current = true
-      const timeTaken = TOTAL_SECONDS - timeLeftRef.current
-      onComplete(scoreRef.current, timeTaken)
+      onComplete(scoreRef.current, TOTAL_SECONDS - timeLeftRef.current)
     } else {
-      setCurrentQ(c => c + 1)
-      setSelected(null)
-      setRevealed(false)
+      setCurrentQ(c => c + 1); setSelected(null); setRevealed(false)
     }
   }
 
   function optStyle(idx: number) {
     const base = 'w-full text-left px-4 py-3 rounded-lg border text-sm transition-all font-mono'
-    if (!revealed) return `${base} bg-slate-900 border-slate-700 hover:border-teal-500 hover:bg-slate-800 cursor-pointer text-slate-200`
-    if (idx === q.correct) return `${base} bg-green-950 border-green-500 text-green-300`
+    if (!revealed) return `${base} cursor-pointer text-slate-200`
+    if (idx === q.correct) return `${base} bg-green-950 border-green-500 text-green-300 answer-pop`
     if (idx === selected)  return `${base} bg-red-950 border-red-500 text-red-300`
-    return `${base} bg-slate-900 border-slate-800 text-slate-500`
+    return `${base} text-slate-600`
+  }
+
+  function optExtraStyle(idx: number): React.CSSProperties {
+    if (!revealed) return { background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)' }
+    if (idx === q.correct || idx === selected) return {}
+    return { background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)' }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
-        {/* Progress + Timer row */}
         <div className="flex justify-between items-center mb-2">
-          <span className="text-slate-400 text-xs font-mono">
-            Question {currentQ + 1} / {questions.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="text-slate-500 text-xs font-mono">⏱</span>
+          <span className="text-slate-500 text-xs font-mono">Question {currentQ + 1} / {questions.length}</span>
+          <div className="flex items-center gap-1.5">
+            <span className="text-slate-600 text-xs">⏱</span>
             <span className={`font-mono text-sm font-bold tabular-nums ${timerColor}`}>
               {formatTime(timeLeft)}
             </span>
           </div>
         </div>
-
-        {/* Progress bar */}
-        <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-6">
+        <div className="h-1 rounded-full overflow-hidden mb-6" style={{ background:'rgba(255,255,255,0.06)' }}>
           <div className="h-full bg-teal-500 rounded-full transition-all duration-300"
             style={{ width: `${((currentQ + 1) / questions.length) * 100}%` }}/>
         </div>
 
         {/* Question card */}
-        <div className="bg-slate-800 border border-slate-700 rounded-xl p-6 shadow-xl mb-4">
+        <div style={{ ...glass, padding: '24px', marginBottom: '16px' }}>
           <div className="flex gap-2 mb-4">
-            <span className="bg-slate-700 text-teal-400 text-xs px-2 py-1 rounded font-mono">{q.concept}</span>
+            <span className="text-teal-400 text-xs px-2 py-1 rounded font-mono"
+              style={{ background:'rgba(13,148,136,0.15)', border:'1px solid rgba(13,148,136,0.3)' }}>
+              {q.concept}
+            </span>
             <span className={`text-xs px-2 py-1 rounded font-mono ${
-              q.difficulty === 'hard'   ? 'bg-red-950 text-red-400'
-            : q.difficulty === 'medium' ? 'bg-yellow-950 text-yellow-400'
-            :                             'bg-green-950 text-green-400'}`}>
+              q.difficulty === 'hard'   ? 'bg-red-950/50 text-red-400 border-red-800/50 border'
+            : q.difficulty === 'medium' ? 'bg-yellow-950/50 text-yellow-400 border-yellow-800/50 border'
+            :                             'bg-green-950/50 text-green-400 border-green-800/50 border'}`}>
               {q.difficulty}
             </span>
           </div>
@@ -269,7 +290,9 @@ function QuizScreen({ questions, onComplete }: {
           <div className="space-y-3">
             {q.options.map((opt, idx) => (
               <button key={idx} onClick={() => handleSelect(idx)}
-                disabled={revealed || doneRef.current} className={optStyle(idx)}>
+                disabled={revealed || doneRef.current}
+                className={optStyle(idx)}
+                style={optExtraStyle(idx)}>
                 <span className="text-slate-500 mr-3">{letters[idx]}.</span>{opt}
               </button>
             ))}
@@ -277,8 +300,8 @@ function QuizScreen({ questions, onComplete }: {
           {revealed && (
             <div className={`mt-4 px-4 py-3 rounded-lg text-sm font-mono ${
               selected === q.correct
-                ? 'bg-green-950 border border-green-800 text-green-300'
-                : 'bg-red-950 border border-red-800 text-red-300'}`}>
+                ? 'bg-green-950/60 border border-green-800 text-green-300'
+                : 'bg-red-950/60 border border-red-800 text-red-300'}`}>
               {selected === q.correct ? '✓ Correct — git add .'
                 : `✗ Incorrect — correct: ${letters[q.correct]}`}
             </div>
@@ -304,51 +327,44 @@ function ResultScreen({ name, rollNumber, score, timeTaken, submitting, submitEr
   const message = getScoreMessage(score)
   const tier    = getScoreTier(score)
   const cfg = {
-    perfect: { border: 'border-yellow-500', icon: '🏆', label: 'PERFECT SCORE',    color: 'text-yellow-300' },
-    good:    { border: 'border-green-500',  icon: '✓',  label: 'BUILD SUCCESSFUL', color: 'text-green-400'  },
-    mid:     { border: 'border-orange-500', icon: '!',  label: 'MERGE CONFLICT',   color: 'text-orange-400' },
-    low:     { border: 'border-red-500',    icon: '✗',  label: 'BUILD FAILED',     color: 'text-red-400'    },
+    perfect: { icon: '🏆', label: 'PERFECT SCORE',    color: 'text-amber-400',  border: tierBorderColor(score) },
+    good:    { icon: '✓',  label: 'BUILD SUCCESSFUL', color: 'text-green-400',  border: tierBorderColor(score) },
+    mid:     { icon: '!',  label: 'MERGE CONFLICT',   color: 'text-orange-400', border: tierBorderColor(score) },
+    low:     { icon: '✗',  label: 'BUILD FAILED',     color: 'text-red-400',    border: tierBorderColor(score) },
   }[tier]
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <div className={`bg-slate-800 border ${cfg.border} rounded-xl p-6 shadow-xl`}>
+        <div style={{ ...glass, border: `1px solid ${cfg.border}40`, padding: '24px' }}>
           <div className="flex items-center gap-2 mb-5">
             <div className="w-3 h-3 rounded-full bg-red-500"/>
             <div className="w-3 h-3 rounded-full bg-yellow-500"/>
             <div className="w-3 h-3 rounded-full bg-green-500"/>
-            <span className="font-mono text-slate-400 text-xs ml-2">quiz-engine — result</span>
+            <span className="font-mono text-slate-500 text-xs ml-2">quiz-engine — result</span>
           </div>
           <p className={`font-mono text-xs mb-2 ${cfg.color}`}>{cfg.icon} {cfg.label}</p>
           <div className="text-center py-6">
             <span className={`text-7xl font-bold font-mono ${cfg.color}`}>{score}</span>
             <span className="text-slate-500 text-3xl font-mono">/10</span>
           </div>
-          <div className="bg-slate-900 rounded-lg px-4 py-3 mb-5">
+          <div className="rounded-lg px-4 py-3 mb-5"
+            style={{ background:'rgba(0,0,0,0.4)', border:'1px solid rgba(255,255,255,0.06)' }}>
             <p className="font-mono text-teal-400 text-sm break-words">{message}</p>
           </div>
           <div className="font-mono text-sm space-y-1.5 mb-5">
-            <div className="flex justify-between">
-              <span className="text-slate-500">name</span>
-              <span className="text-white">{name}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">roll_no</span>
-              <span className="text-teal-400">{rollNumber}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-slate-500">time</span>
-              <span className="text-slate-300">{formatTime(timeTaken)}</span>
-            </div>
+            <div className="flex justify-between"><span className="text-slate-500">name</span><span className="text-white">{name}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">roll_no</span><span className="text-teal-400">{rollNumber}</span></div>
+            <div className="flex justify-between"><span className="text-slate-500">time</span><span className="text-slate-300">{formatTime(timeTaken)}</span></div>
           </div>
           {submitError && (
-            <div className="bg-red-950 border border-red-800 rounded-lg px-4 py-3 mb-4">
+            <div className="rounded-lg px-4 py-3 mb-4"
+              style={{ background:'rgba(220,38,38,0.15)', border:'1px solid rgba(220,38,38,0.3)' }}>
               <p className="text-red-400 text-sm font-mono">{submitError}</p>
             </div>
           )}
           <button onClick={onLeaderboard} disabled={submitting}
-            className="w-full bg-teal-600 hover:bg-teal-500 disabled:bg-slate-700 text-white
+            className="w-full bg-teal-600 hover:bg-teal-500 disabled:opacity-40 text-white
                        font-semibold py-3 rounded-lg transition-colors disabled:cursor-not-allowed">
             {submitting ? <Spinner/> : 'View Leaderboard →'}
           </button>
@@ -385,11 +401,8 @@ export default function HomePage() {
   }, [])
 
   const handleQuizComplete = useCallback(async (score: number, timeTaken: number) => {
-    setFinalScore(score)
-    setFinalTime(timeTaken)
-    setScreen('result')
-    setSubmitting(true)
-    setSubmitError('')
+    setFinalScore(score); setFinalTime(timeTaken); setScreen('result')
+    setSubmitting(true); setSubmitError('')
     try {
       const res  = await fetch('/api/submit', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -397,11 +410,8 @@ export default function HomePage() {
       })
       const data = await res.json()
       if (!data.success) setSubmitError('Score could not be saved — contact your teacher.')
-    } catch {
-      setSubmitError('Network error.')
-    } finally {
-      setSubmitting(false)
-    }
+    } catch { setSubmitError('Network error.') }
+    finally { setSubmitting(false) }
   }, [rollNumber, playerName])
 
   if (screen === 'landing') return <LandingScreen onStart={handleStart}/>
