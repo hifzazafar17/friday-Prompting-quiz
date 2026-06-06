@@ -11,7 +11,7 @@ const TIER_CONFIG = {
     range: '10/10 →',
     message: 'git commit -m "Perfect score. No bugs found."',
     color: 'text-yellow-300',
-    bg: 'bg-yellow-950',
+    bg: 'bg-yellow-900',
     border: 'border-yellow-700',
   },
   good: {
@@ -19,24 +19,24 @@ const TIER_CONFIG = {
     range: '7-9/10 →',
     message: 'Build successful with warnings.',
     color: 'text-green-400',
-    bg: 'bg-green-950',
-    border: 'border-green-800',
+    bg: 'bg-green-900',
+    border: 'border-green-700',
   },
   mid: {
     heading: 'Keep Up',
     range: '4-6/10 →',
     message: 'Merge conflicts detected.',
-    color: 'text-orange-400',
-    bg: 'bg-orange-950',
-    border: 'border-orange-800',
+    color: 'text-orange-300',
+    bg: 'bg-orange-900',
+    border: 'border-orange-700',
   },
   low: {
     heading: 'Work Hard',
     range: '0-3/10 →',
     message: 'npm install brain --save && retry',
-    color: 'text-red-400',
-    bg: 'bg-red-950',
-    border: 'border-red-800',
+    color: 'text-red-300',
+    bg: 'bg-red-900',
+    border: 'border-red-700',
   },
 }
 
@@ -133,7 +133,7 @@ export default function LeaderboardPage() {
                       <div className={`${cfg.bg} border ${cfg.border} rounded-t-xl px-4 py-4`}>
                         <h2 className={`text-xl font-bold ${cfg.color}`}>{cfg.heading}</h2>
                         <p className="text-slate-500 font-mono text-xs mt-0.5">{cfg.range}</p>
-                        <p className="text-slate-600 font-mono text-xs mt-2 leading-relaxed break-words">
+                        <p className="text-slate-300 font-mono text-xs mt-2 leading-relaxed break-words">
                           {cfg.message}
                         </p>
                         <div className="mt-3 pt-2.5 border-t border-slate-700/40">
